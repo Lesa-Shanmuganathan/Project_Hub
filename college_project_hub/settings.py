@@ -44,7 +44,7 @@ if 'RENDER' in os.environ:
 # Railway - accepts all *.railway.app domains
 if 'RAILWAY_ENVIRONMENT' in os.environ:
     ALLOWED_HOSTS.append('*.railway.app')
-    ALLOWED_HOSTS.append('web-production-*.up.railway.app')
+    ALLOWED_HOSTS.append('web-production-eb21d.up.railway.app')
 
 
 # Application definition
