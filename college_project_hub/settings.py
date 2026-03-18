@@ -170,18 +170,15 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Security Settings for Production
 if not DEBUG:
-    # HTTPS/SSL
-    SECURE_SSL_REDIRECT = True
+    # Railway handles HTTPS at proxy level, so don't redirect
+    SECURE_SSL_REDIRECT = False
+    
+    # Tell Django to trust Railway's forwarded HTTPS header
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_SECURITY_POLICY = {
-        'default-src': ("'self'",),
-        'script-src': ("'self'", 'cdn.jsdelivr.net', "'unsafe-inline'"),
-        'style-src': ("'self'", 'cdn.jsdelivr.net', 'fonts.googleapis.com', "'unsafe-inline'"),
-        'font-src': ("'self'", 'fonts.gstatic.com'),
-        'img-src': ("'self'", 'data:', 'https:'),
-    }
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
