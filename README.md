@@ -269,24 +269,69 @@ cloudinary.config(
 
 ## 🚀 Deployment
 
-### Production Checklist
-- [ ] Set `DEBUG = False` in settings.py
-- [ ] Update `ALLOWED_HOSTS` with your domain
-- [ ] Set strong `SECRET_KEY`
-- [ ] Configure external database (PostgreSQL recommended)
-- [ ] Set up Cloudinary for media storage
-- [ ] Configure email backend
-- [ ] Run `python manage.py collectstatic`
-- [ ] Use production WSGI server (Gunicorn, uWSGI)
-- [ ] Set up SSL certificates
-- [ ] Configure environment variables
-- [ ] Enable CORS if needed
+This project is pre-configured for deployment to **Render** using the `render.yaml` blueprint configuration.
 
-### Deployment Options
-- **Heroku** - Built-in Django support with Procfile included
+### 📖 Render Quick Start
+
+For detailed step-by-step deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+**Quick Summary:**
+1. Push code to GitHub
+2. Connect repo to Render
+3. Set environment variables
+4. Deploy automatically
+
+**Key Features:**
+- ✅ Auto-scaling web service with Gunicorn
+- ✅ PostgreSQL database (auto-created)
+- ✅ Environment variable configuration
+- ✅ Static file handling with WhiteNoise
+- ✅ Continuous deployment on git push
+- ✅ HTTPS/SSL included
+
+### Environment Variables
+
+Required for Render (set in Dashboard):
+```
+DEBUG = false
+ALLOWED_HOSTS = your-app-name.onrender.com
+SECRET_KEY = [Render auto-generates]
+DATABASE_URL = [Render auto-links from PostgreSQL]
+```
+
+Optional:
+```
+CLOUDINARY_CLOUD_NAME = your_cloud_name
+CLOUDINARY_API_KEY = your_api_key
+CLOUDINARY_API_SECRET = your_api_secret
+```
+
+### Deployment Files Included
+
+- **`render.yaml`** - Render deployment manifest (web service + PostgreSQL)
+- **`build.sh`** - Custom build script for pip install, collectstatic, migrate
+- **`.env.example`** - Environment variable template
+- **`requirements.txt`** - All production dependencies pre-configured
+
+### Production Checklist
+- [ ] Create GitHub repository and push code
+- [ ] Create Render account
+- [ ] Connect GitHub repo to Render
+- [ ] Set environment variables in Render dashboard
+- [ ] Database (PostgreSQL) auto-created
+- [ ] Run migrations via Render Shell
+- [ ] Create admin user
+- [ ] Test at your Render domain
+- [ ] Set custom domain (optional)
+- [ ] Configure Cloudinary (optional)
+
+### Alternative Deployment Options
+- **Heroku** - Procfile included, simple git push deployment
 - **AWS** - EC2, RDS, S3 for scalable deployment
 - **DigitalOcean** - Affordable VPS with one-click apps
 - **PythonAnywhere** - Beginner-friendly Python hosting
+- **Railway** - Similar to Render, great PostgreSQL support
+- **Fly.io** - Modern containerized deployment
 
 ## 🐛 Troubleshooting
 
