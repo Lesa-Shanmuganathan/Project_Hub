@@ -26,16 +26,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-5eqg(8&6d0(w56w03!huq8uux!&afp52iwg!zw+bu#&4^tj)$#')
+# In production, MUST be set via environment variable
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-# Add Render domain dynamically
+# Add dynamic domains for deployment platforms
+# Render
 if 'RENDER' in os.environ:
-    ALLOWED_HOSTS.append(os.getenv('RENDER_EXTERNAL_HOSTNAME', ''))
+    render_host = os.getenv('RENDER_EXTERNAL_HOSTNAME', '')
+    if render_host:
+        ALLOWED_HOSTS.append(render_host)
+
+# Railway - accepts all *.railway.app domains
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    ALLOWED_HOSTS.append('*.railway.app')
+    ALLOWED_HOSTS.append('web-production-*.up.railway.app')
 
 
 # Application definition
