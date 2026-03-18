@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Project Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'project_list' %}">Projects</a></li>
+                        <li class="breadcrumb-item active">{{ project.title|truncatewords:5 }}</li>
+                    </ol>
+                </nav>
+                
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <h1 class="h2 fw-bold">{{ project.title }}</h1>
+                        <div class="d-flex align-items-center gap-3 text-muted">
+                            <span><i class="bi bi-calendar me-1"></i>{{ project.created_at|date:"M d, Y" }}</span>
+                            <span><i class="bi bi-eye me-1"></i>{{ project.views_count }} views</span>
+                            <span><i class="bi bi-heart me-1"></i>{{ project.likes.count }} likes</span>
+                        </div>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-danger like-btn" data-project-id="{{ project.pk }}">
+                            <i class="bi bi-heart{% if is_liked %}-fill{% endif %}"></i>
+                            <span class="like-count">{{ project.likes.count }}</span>
+                        </button>
+                        <button class="btn btn-outline-warning bookmark-btn" data-project-id="{{ project.pk }}">
+                            <i class="bi bi-bookmark{% if is_bookmarked %}-fill{% endif %}"></i>
+                        </button>
+                        {% if user == project.author or user.is_admin_user %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'project_update' project.slug %}">
+                                        <i class="bi bi-pencil me-2"></i>Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'project_delete' project.slug %}">
+                                        <i class="bi bi-trash me-2"></i>Delete
+                                    </a>
+                                </li>
+                                {% if user.is_admin_user and project.status != 'featured' %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'feature_project' project.pk %}">
+                                        <i class="bi bi-star me-2"></i>Feature
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Thumbnail -->
+            {% if project.thumbnail %}
+            <div class="project-thumbnail mb-4">
+                <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" class="img-fluid rounded-3 shadow">
+            </div>
+            {% endif %}
+            
+            <!-- Badges -->
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                {% if project.status == 'featured' %}
+                <span class="badge bg-warning">
+                    <i class="bi bi-star-fill me-1"></i>Featured
+                </span>
+                {% endif %}
+                {% if project.category %}
+                <span class="badge bg-primary">
+                    <i class="bi {{ project.category.icon }} me-1"></i>{{ project.category.name }}
+                </span>
+                {% endif %}
+                {% for tech in project.technologies.all %}
+                <span class="badge" style="background-color: {{ tech.color }}20; color: {{ tech.color }}; border: 1px solid {{ tech.color }};">
+                    {{ tech.name }}
+                </span>
+                {% endfor %}
+            </div>
+            
+            <!-- Description -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Description</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ project.description }}</p>
+                    {% if project.detailed_description %}
+                    <hr>
+                    <div class="detailed-description">
+                        {{ project.detailed_description|linebreaks }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Project Images -->
+            {% if project.images.exists %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-images me-2"></i>Screenshots</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for image in project.images.all %}
+                        <div class="col-md-6">
+                            <a href="{{ image.image.url }}" target="_blank">
+                                <img src="{{ image.image.url }}" alt="{{ image.caption }}" 
+                                     class="img-fluid rounded shadow-sm">
+                            </a>
+                            {% if image.caption %}
+                            <small class="text-muted d-block mt-1">{{ image.caption }}</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Comments -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Comments</h5>
+                    <span class="badge bg-primary">{{ comments.count }}</span>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                    <form method="POST" action="{% url 'add_comment' project.pk %}" class="mb-4">
+                        {% csrf_token %}
+                        {{ comment_form.content }}
+                        <button type="submit" class="btn btn-primary mt-2">
+                            <i class="bi bi-send me-1"></i>Post Comment
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <a href="{% url 'accounts:login' %}">Login</a> to post a comment.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="comments-list">
+                        {% for comment in comments %}
+                        <div class="comment-item d-flex gap-3 mb-3 pb-3 border-bottom">
+                            <div class="flex-shrink-0">
+                                {% if comment.author.profile_picture %}
+                                <img src="{{ comment.author.profile_picture.url }}" alt="" 
+                                     class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 40px; height: 40px;">
+                                    {{ comment.author.username|first|upper }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'accounts:profile' comment.author.pk %}" class="fw-semibold text-decoration-none">
+                                        {{ comment.author.username }}
+                                    </a>
+                                    <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                </div>
+                                <p class="mb-0">{{ comment.content }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted text-center">No comments yet. Be the first to comment!</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Author Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person me-2"></i>Author</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if project.author.profile_picture %}
+                    <img src="{{ project.author.profile_picture.url }}" alt="" 
+                         class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                         style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ project.author.username|first|upper }}
+                    </div>
+                    {% endif %}
+                    <h5>{{ project.author.get_full_name|default:project.author.username }}</h5>
+                    <p class="text-muted mb-2">
+                        {{ project.author.get_role_display }}
+                        {% if project.author.department %} • {{ project.author.department }}{% endif %}
+                    </p>
+                    {% if project.author.year %}
+                    <span class="badge bg-secondary">{{ project.author.get_year_display }}</span>
+                    {% endif %}
+                    <div class="mt-3">
+                        <a href="{% url 'accounts:profile' project.author.pk %}" class="btn btn-outline-primary btn-sm">
+                            View Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project Links -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-link-45deg me-2"></i>Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if project.github_link %}
+                        <a href="{{ project.github_link }}" target="_blank" class="btn btn-dark">
+                            <i class="bi bi-github me-2"></i>GitHub Repository
+                        </a>
+                        {% endif %}
+                        {% if project.live_demo_link %}
+                        <a href="{{ project.live_demo_link }}" target="_blank" class="btn btn-success">
+                            <i class="bi bi-globe me-2"></i>Live Demo
+                        </a>
+                        {% endif %}
+                        {% if project.video_link %}
+                        <a href="{{ project.video_link }}" target="_blank" class="btn btn-danger">
+                            <i class="bi bi-youtube me-2"></i>Video Demo
+                        </a>
+                        {% endif %}
+                        {% if project.dataset_link %}
+                        <a href="{{ project.dataset_link }}" target="_blank" class="btn btn-info">
+                            <i class="bi bi-database me-2"></i>Dataset
+                        </a>
+                        {% endif %}
+                        {% if project.documentation_link %}
+                        <a href="{{ project.documentation_link }}" target="_blank" class="btn btn-secondary">
+                            <i class="bi bi-file-earmark-text me-2"></i>Documentation
+                        </a>
+                        {% endif %}
+                        {% if not project.github_link and not project.live_demo_link and not project.video_link %}
+                        <p class="text-muted text-center mb-0">No links provided</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Projects -->
+            {% if related_projects %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-collection me-2"></i>Related Projects</h5>
+                </div>
+                <div class="card-body">
+                    {% for rp in related_projects %}
+                    <a href="{% url 'project_detail' rp.slug %}" class="text-decoration-none">
+                        <div class="d-flex gap-3 mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                            {% if rp.thumbnail %}
+                            <img src="{{ rp.thumbnail.url }}" alt="" class="rounded" 
+                                 style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                 style="width: 60px; height: 60px;">
+                                <i class="bi bi-folder text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-1 text-dark">{{ rp.title|truncatewords:5 }}</h6>
+                                <small class="text-muted">by {{ rp.author.username }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Like functionality
+    const likeBtn = document.querySelector('.like-btn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function() {
+            const projectId = this.dataset.projectId;
+            fetch(`/api/projects/${projectId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const icon = this.querySelector('i');
+                const count = this.querySelector('.like-count');
+                icon.className = data.liked ? 'bi bi-heart-fill' : 'bi bi-heart';
+                count.textContent = data.count;
+            });
+        });
+    }
+    
+    // Bookmark functionality
+    const bookmarkBtn = document.querySelector('.bookmark-btn');
+    if (bookmarkBtn) {
+        bookmarkBtn.addEventListener('click', function() {
+            const projectId = this.dataset.projectId;
+            fetch(`/api/projects/${projectId}/bookmark/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const icon = this.querySelector('i');
+                icon.className = data.bookmarked ? 'bi bi-bookmark-fill' : 'bi bi-bookmark';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

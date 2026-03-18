@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Projects - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-clock-history me-2"></i>Pending Review
+        <span class="badge bg-warning ms-2">{{ projects.count }}</span>
+    </h2>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>Submitted</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for project in projects %}
+                <tr>
+                    <td>
+                        <a href="{% url 'project_detail' project.slug %}" class="fw-semibold text-decoration-none">
+                            {{ project.title }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'accounts:profile' project.author.pk %}">
+                            {{ project.author.username }}
+                        </a>
+                    </td>
+                    <td>{{ project.category.name|default:"-" }}</td>
+                    <td>{{ project.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'approve_project' project.pk %}" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Approve
+                            </a>
+                            <a href="{% url 'reject_project' project.pk %}" class="btn btn-danger">
+                                <i class="bi bi-x-circle"></i> Reject
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        No pending projects to review!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

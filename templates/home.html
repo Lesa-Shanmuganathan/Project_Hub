@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Showcase Your <span class="text-gradient">Academic Projects</span>
+                </h1>
+                <p class="lead mb-4">
+                    A centralized platform for students to upload, discover, and learn from projects 
+                    built by fellow students. Never let a great project go unnoticed again!
+                </p>
+                <div class="hero-pill"><i class="bi bi-shield-lock-fill me-2"></i>Trusted by Students & Faculty</div>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'project_list' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search me-2"></i>Explore Projects
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'project_create' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-upload me-2"></i>Upload Project
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-person-plus me-2"></i>Get Started
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-illustration">
+                    <div class="floating-card card-1">
+                        <i class="bi bi-code-slash"></i>
+                        <span>Machine Learning</span>
+                    </div>
+                    <div class="floating-card card-2">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Data Analysis</span>
+                    </div>
+                    <div class="floating-card card-3">
+                        <i class="bi bi-robot"></i>
+                        <span>AI Projects</span>
+                    </div>
+                    <div class="floating-card card-4">
+                        <i class="bi bi-globe"></i>
+                        <span>Web Apps</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-folder-fill text-primary"></i>
+                    <h2 class="fw-bold">{{ total_projects }}+</h2>
+                    <p class="text-muted mb-0">Projects Showcased</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-people-fill text-success"></i>
+                    <h2 class="fw-bold">{{ total_students }}+</h2>
+                    <p class="text-muted mb-0">Active Students</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="bi bi-bookmark-fill text-warning"></i>
+                    <h2 class="fw-bold">{{ categories.count }}</h2>
+                    <p class="text-muted mb-0">Categories</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Projects -->
+{% if featured_projects %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-star-fill text-warning me-2"></i>Featured Projects
+            </h2>
+        </div>
+        <div class="row g-4">
+            {% for project in featured_projects %}
+            <div class="col-md-4">
+                <div class="card project-card h-100 featured">
+                    <div class="card-img-wrapper">
+                        {% if project.thumbnail %}
+                        <img src="{{ project.thumbnail.url }}" class="card-img-top" alt="{{ project.title }}">
+                        {% else %}
+                        <div class="card-img-placeholder">
+                            <i class="bi bi-folder-fill"></i>
+                        </div>
+                        {% endif %}
+                        <span class="badge bg-warning position-absolute top-0 end-0 m-2">
+                            <i class="bi bi-star-fill me-1"></i>Featured
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            {% if project.category %}
+                            <span class="badge bg-primary-subtle text-primary me-2">
+                                {{ project.category.name }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title">{{ project.title }}</h5>
+                        <p class="card-text text-muted">{{ project.description|truncatewords:20 }}</p>
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            {% for tech in project.technologies.all|slice:":3" %}
+                            <span class="badge" style="background-color: {{ tech.color }}20; color: {{ tech.color }};">
+                                {{ tech.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'accounts:profile' project.author.pk %}" class="text-decoration-none">
+                                <small class="text-muted">
+                                    <i class="bi bi-person-circle me-1"></i>{{ project.author.username }}
+                                </small>
+                            </a>
+                            <a href="{% url 'project_detail' project.slug %}" class="btn btn-sm btn-primary">
+                                View <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Categories -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="fw-bold mb-4 text-center">
+            <i class="bi bi-grid me-2"></i>Browse by Category
+        </h2>
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <a href="{% url 'project_list' %}?category={{ category.slug }}" class="text-decoration-none">
+                    <div class="category-card text-center p-4">
+                        <i class="bi {{ category.icon }} display-4 text-primary mb-3"></i>
+                        <h5 class="mb-1">{{ category.name }}</h5>
+                        <small class="text-muted">{{ category.project_count }} projects</small>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No categories yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Recent Projects -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-clock-history me-2"></i>Recent Projects
+            </h2>
+            <a href="{% url 'project_list' %}" class="btn btn-outline-primary">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="row g-4">
+            {% for project in projects %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card project-card h-100">
+                    <div class="card-img-wrapper">
+                        {% if project.thumbnail %}
+                        <img src="{{ project.thumbnail.url }}" class="card-img-top" alt="{{ project.title }}">
+                        {% else %}
+                        <div class="card-img-placeholder">
+                            <i class="bi bi-folder-fill"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            {% if project.category %}
+                            <span class="badge bg-primary-subtle text-primary">
+                                {{ project.category.name }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title">{{ project.title }}</h5>
+                        <p class="card-text text-muted">{{ project.description|truncatewords:15 }}</p>
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            {% for tech in project.technologies.all|slice:":3" %}
+                            <span class="badge" style="background-color: {{ tech.color }}20; color: {{ tech.color }};">
+                                {{ tech.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-eye me-1"></i>{{ project.views_count }}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="bi bi-heart me-1"></i>{{ project.likes.count }}
+                                </small>
+                            </div>
+                            <a href="{% url 'project_detail' project.slug %}" class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-folder-x display-1 text-muted"></i>
+                <h4 class="mt-3">No projects yet</h4>
+                <p class="text-muted">Be the first to showcase your project!</p>
+                <a href="{% url 'project_create' %}" class="btn btn-primary">
+                    <i class="bi bi-upload me-2"></i>Upload Project
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-3">Ready to Showcase Your Project?</h2>
+        <p class="lead mb-4">Join our community of innovative students and share your work with the world.</p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'project_create' %}" class="btn btn-light btn-lg">
+            <i class="bi bi-upload me-2"></i>Upload Your Project
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">
+            <i class="bi bi-person-plus me-2"></i>Create Free Account
+        </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Upload{% endif %} Project - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-{% if form.instance.pk %}pencil{% else %}upload{% endif %} me-2"></i>
+                        {% if form.instance.pk %}Edit Project{% else %}Upload New Project{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Project Title *</label>
+                            {{ form.title }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Category</label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Thumbnail</label>
+                                {{ form.thumbnail }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Short Description *</label>
+                            {{ form.description }}
+                            <small class="text-muted">Brief overview of your project (will appear in cards)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Detailed Description</label>
+                            {{ form.detailed_description }}
+                            <small class="text-muted">Explain features, challenges, and learnings</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Technologies Used</label>
+                            <div class="tech-checkboxes p-3 border rounded">
+                                {{ form.technologies }}
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3"><i class="bi bi-link me-2"></i>Project Links</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">GitHub Repository</label>
+                                {{ form.github_link }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Live Demo URL</label>
+                                {{ form.live_demo_link }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Video Demo (YouTube)</label>
+                                {{ form.video_link }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Dataset Link</label>
+                                {{ form.dataset_link }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Documentation Link</label>
+                            {{ form.documentation_link }}
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Your project will be reviewed by administrators before being published.
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>
+                                {% if form.instance.pk %}Update Project{% else %}Submit Project{% endif %}
+                            </button>
+                            <a href="{% url 'my_projects' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Bookmarked Projects - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-bookmark-fill me-2"></i>Bookmarked Projects
+    </h2>
+    
+    <div class="row g-4">
+        {% for project in projects %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card project-card h-100">
+                <div class="card-img-wrapper">
+                    {% if project.thumbnail %}
+                    <img src="{{ project.thumbnail.url }}" class="card-img-top" alt="{{ project.title }}">
+                    {% else %}
+                    <div class="card-img-placeholder">
+                        <i class="bi bi-folder-fill"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ project.title }}</h5>
+                    <p class="card-text text-muted small">{{ project.description|truncatewords:15 }}</p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">by {{ project.author.username }}</small>
+                        <a href="{% url 'project_detail' project.slug %}" class="btn btn-sm btn-primary">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-bookmark-x display-1 text-muted"></i>
+            <h4 class="mt-3">No bookmarks yet</h4>
+            <p class="text-muted">Explore projects and bookmark ones you like!</p>
+            <a href="{% url 'project_list' %}" class="btn btn-primary">
+                <i class="bi bi-search me-2"></i>Explore Projects
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
