@@ -167,7 +167,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # WhiteNoise Configuration
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+CSRF_TRUSTED_ORIGINS = ['https://web-production-eb21d.up.railway.app']
 # Security Settings for Production
 if not DEBUG:
     # Railway handles HTTPS at proxy level, so don't redirect
@@ -178,7 +178,7 @@ if not DEBUG:
     
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    CSRF_TRUSTED_ORIGINS = ['https://web-production-eb21d.up.railway.app']
+    
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
