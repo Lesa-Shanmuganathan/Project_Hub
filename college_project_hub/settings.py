@@ -178,7 +178,10 @@ if not DEBUG:
     
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    CSRF_TRUSTED_ORIGINS = ['https://web-production-eb21d.up.railway.app']
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    # WhiteNoise - don't crash if staticfiles dir doesn't exist
+    WHITENOISE_USE_FINDERS = True
